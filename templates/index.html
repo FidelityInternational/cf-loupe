@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<link rel="stylesheet" href="/assets/bulma.min.css" />
+		<link rel="stylesheet" href="/assets/jquery.dataTables.min.css" />
+		<script src="/assets/jquery.min.js"></script>
+		<script src="/assets/jquery.dataTables.min.js"></script>
+		<script>
+			$(document).ready(function() {
+					var table = $('table#apps').DataTable({
+						"paging": true,
+						"scrollX": true,
+						"ajax": {
+							"url": "/listapps",
+							"dataSrc": "Apps"
+						},
+						"columns": [
+							{ "data": "Name" },
+							{ "data": "Foundation" },
+							{ "data": "Org" },
+							{ "data": "Space" },
+							{ "data": "Instances" },
+							{ "data": "MemoryMB" },
+							{ "data": "State" },
+							{ "data": "UpdatedAt" },
+							{
+								data: 'IsStale',
+								render: function ( data, type, row ) {
+									if (data) {
+										return "no"
+									}
+									return "yes"
+								}
+							},
+							{
+								data: 'Buildpack',
+								render: function ( data, type, row ) {
+									return data.Name +' '+ data.Version;
+								}
+							},
+							{
+								data: 'Buildpack',
+								render: function ( data, type, row ) {
+									if (data.IsDeprecated)  {
+										return "no"
+									}
+									return "yes"
+								}
+							},
+							{
+								data: null,
+								render: function ( data, type, row ) {
+									if (data.IsStale || data.Buildpack.IsDeprecated) {
+										return "&#10007;" // x
+									}
+									return "&#10003;" // v
+								}
+							},
+						],
+						"createdRow": function ( row, data, index ) {
+							if (data.Buildpack.IsDeprecated) {
+								$(row).addClass("deprecation-yes");
+							} else {
+								$(row).addClass("deprecation-no");
+							}
+							if (data.IsStale) {
+								$(row).addClass("staleness-yes");
+							} else {
+								$(row).addClass("staleness-no");
+							}
+						},
+					});
+					table.on( 'search.dt', function () {
+						$('#totalApps').text(
+							table
+								.rows( {search:'applied'} )
+								.nodes()
+								.length
+						);
+						$('#staleApps').text(
+							table
+								.rows( {search:'applied'} )
+								.nodes()
+								.to$()
+								.filter( '.staleness-yes' )
+								.length
+						);
+						$('#deprecatedApps').text(
+							table
+								.rows( {search:'applied'} )
+								.nodes()
+								.to$()
+								.filter( '.deprecation-yes' )
+								.length
+						);
+					});
+			});
+		</script>
+		<style>
+			td {
+				font-weight: bold;
+			}
+			.staleness-yes {
+				color: rgb(1, 97, 148) !important; // blue
+			}
+			.deprecation-yes, .deprecation-unknown {
+				color: rgb(183, 43, 42) !important; // red
+			}
+		</style>
+	</head>
+	<body>
+	<section class="hero is-medium">
+		<div class="hero-body">
+			<div class="container">
+				<div class="columns is-vcentered">
+					<div class="column is-narrow">
+						<img src="/assets/loupe.jpg" width="250" alt="image of a loupe" />
+					</div>
+					<div class="column">
+						<h1 class="title">
+							CF Loupe
+						</h1>
+						<h2 class="subtitle">
+							App and buildpack status dashboard
+						</h2>
+						<p>Custom buildpacks and official buildpacks that are 2 or more versions old are considered out of support and are highlighted in red.</p>
+						<p>Apps that haven't been updated within the last two weeks are considered stale and are highlighted in blue.</p>
+						<p>Click on any column heading to change the ordering.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+		<div class="container is-fluid">
+			<nav class="level">
+				<div class="level-item has-text-centered">
+					<div>
+						<p class="heading">Total apps</p>
+						<p class="title" id="totalApps"></p>
+					</div>
+				</div>
+				<div class="level-item has-text-centered">
+					<div>
+						<p class="heading">Stale apps</p>
+						<p class="title" id="staleApps"></p>
+					</div>
+				</div>
+				<div class="level-item has-text-centered">
+					<div>
+						<p class="heading">Apps not using officially supported buildpacks</p>
+						<p class="title" id="deprecatedApps"></p>
+					</div>
+				</div>
+			</nav>
+			<table class="table is-fullwidth" id="apps">
+				<thead>
+					<tr>
+						<th>App</th>
+						<th>Foundation</th>
+						<th>Org</th>
+						<th>Space</th>
+						<th>Instances</th>
+						<th>Memory (MB)</th>
+						<th>State</th>
+						<th>Last Updated</th>
+						<th>Up&#8209;to&#8209;date</th>
+						<th>Buildpack</th>
+						<th>Supported Buildpack</th>
+						<th>Status</th>
+					</tr>
+				</thead>
+			</table>
+		</div>
+	</body>
+</html>
