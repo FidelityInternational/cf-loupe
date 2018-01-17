@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -215,18 +216,20 @@ func generateBuildpacks(gocfbuildpacksMap map[string]gocf.Buildpack) (map[string
 
 	// update buildpacks map with freshness values
 	for guid, buildpack := range buildpacksMap {
-		availableVersions := buildpackVersions[buildpack.Name] // [3.18.0, 3.19.0, 3.20.0]
+		availableVersions := buildpackVersions[buildpack.Name] // 4 => [4.6.1, 4.6.0], 3 => [3.18.0, 3.19.0, 3.20.0]
 
 		// ensure that version is formated according to version library
 		parsedVersion, _ := version.NewVersion(buildpack.Version)
 		version := parsedVersion.String()
 
-		for index, possibleVersion := range availableVersions {
-			if version == possibleVersion {
-				freshness := len(availableVersions) - index - 1
-				buildpack.Freshness = freshness
-				buildpacksMap[guid] = buildpack
-				break
+		for _, minorVersions := range availableVersions {
+			for index, possibleVersion := range minorVersions {
+				if version == possibleVersion {
+					freshness := len(minorVersions) - index - 1
+					buildpack.Freshness = freshness
+					buildpacksMap[guid] = buildpack
+					break
+				}
 			}
 		}
 	}
@@ -246,9 +249,10 @@ func generateBuildpacks(gocfbuildpacksMap map[string]gocf.Buildpack) (map[string
 	return buildpacksMap, nil
 }
 
-func generateBuildpackVersions(buildpacksMap map[string]Buildpack) (map[string][]string, error) {
+func generateBuildpackVersions(buildpacksMap map[string]Buildpack) (map[string]map[int][]string, error) {
 	// maps buildpack name -> list of versions
 	versionsMap := map[string][]string{}
+	majorVersionsMap := map[string]map[int][]string{}
 
 	// if no versions array for buildpack, initialize a new versions array
 	for _, buildpack := range buildpacksMap {
@@ -261,6 +265,7 @@ func generateBuildpackVersions(buildpacksMap map[string]Buildpack) (map[string][
 	// Add versions to versions array for each buildpack
 	for _, buildpack := range buildpacksMap {
 		versions := versionsMap[buildpack.Name]
+
 		versions = append(versions, buildpack.Version)
 		versionsMap[buildpack.Name] = versions
 	}
@@ -274,14 +279,40 @@ func generateBuildpackVersions(buildpacksMap map[string]Buildpack) (map[string][
 	// Sort versions array according to semantic versioning
 	for _, buildpack := range buildpacksMap {
 		versions := versionsMap[buildpack.Name]
-		sortedVersions, err := semverSort(versions)
+		majorVersionSplit, err := separateMajorVersions(versions)
 		if err != nil {
 			return nil, err
 		}
-		versionsMap[buildpack.Name] = sortedVersions
+		for majorVersion, minorVersions := range majorVersionSplit {
+			sortedVersions, err := semverSort(minorVersions)
+			if err != nil {
+				return nil, err
+			}
+			majorVersionSplit[majorVersion] = sortedVersions
+		}
+
+		majorVersionsMap[buildpack.Name] = majorVersionSplit
 	}
 
-	return versionsMap, nil
+	return majorVersionsMap, nil
+}
+
+func separateMajorVersions(versions []string) (map[int][]string, error) {
+	versionsByMajor := map[int][]string{}
+
+	re, err := regexp.Compile(`^(\d+)?.`)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, version := range versions {
+		matches := re.FindStringSubmatch(version)
+		if len(matches) > 0 {
+			majorVersion, _ := strconv.Atoi(matches[1])
+			versionsByMajor[majorVersion] = append(versionsByMajor[majorVersion], version)
+		}
+	}
+	return versionsByMajor, nil
 }
 
 // Sorts an array of strings by comparing semantic version

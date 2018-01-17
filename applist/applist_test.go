@@ -37,6 +37,8 @@ var _ = Describe("Build", func() {
 			gocf.App{Name: "app-binary_buildpack", DetectedBuildpackGuid: "guid-22", UpdatedAt: "2017-08-22T12:00:00Z", SpaceGuid: "def456", Instances: 1, Memory: 512, State: "stopped"},
 			gocf.App{Name: "app-dotnet", DetectedBuildpackGuid: "guid-23", UpdatedAt: "2017-08-23T12:00:00Z", SpaceGuid: "def456", Instances: 1, Memory: 512, State: "stopped"},
 			gocf.App{Name: "app-no-buildpack", DetectedBuildpackGuid: "", UpdatedAt: "2017-08-23T12:00:00Z", SpaceGuid: "def456", Instances: 1, Memory: 512, State: "stopped"},
+			gocf.App{Name: "app-java-v4", DetectedBuildpackGuid: "guid-24", UpdatedAt: "2017-08-06T12:00:00Z", SpaceGuid: "def456", Instances: 1, Memory: 512, State: "stopped"},
+			gocf.App{Name: "app-java-another-v4", DetectedBuildpackGuid: "guid-25", UpdatedAt: "2017-08-06T12:00:00Z", SpaceGuid: "def456", Instances: 1, Memory: 512, State: "stopped"},
 		}
 
 		buildpacksMap := map[string]gocf.Buildpack{
@@ -63,6 +65,8 @@ var _ = Describe("Build", func() {
 			"guid-21": gocf.Buildpack{Name: "php_buildpack", Filename: "php_buildpack-cached-v4.3.33.zip"},
 			"guid-22": gocf.Buildpack{Name: "binary_buildpack", Filename: "binary-buildpack-v1.0.13.zip"},
 			"guid-23": gocf.Buildpack{Name: "dotnet-core-buildpack", Filename: "dotnet-core_buildpack-cached-v1.0.18.zip"},
+			"guid-24": gocf.Buildpack{Name: "java-buildpack-v4_6-company-3e097ee", Filename: "java-buildpack-v4_6-company-3e097ee.zip"},
+			"guid-25": gocf.Buildpack{Name: "java-v4_7_1-company-c35e32c", Filename: "java-buildpack-v4_7_1-company-c35e32c.zip"},
 		}
 
 		foundation := Foundation{
@@ -110,6 +114,9 @@ var _ = Describe("Build", func() {
 		Expect(appList[21].Buildpack).To(Equal(Buildpack{Name: "binary", Version: "1.0.13", Freshness: 0, IsDeprecated: false}))
 		Expect(appList[22].Buildpack).To(Equal(Buildpack{Name: "dotnet-core", Version: "1.0.18", Freshness: 0, IsDeprecated: false}))
 		Expect(appList[23].Buildpack).To(Equal(Buildpack{Name: "Undetected - app unable to start", Version: "Not applicable", Freshness: 99, IsDeprecated: true}))
+		Expect(appList[24].Buildpack).To(Equal(Buildpack{Name: "java", Version: "4.6", Freshness: 1, IsDeprecated: false}))
+		Expect(appList[25].Buildpack).To(Equal(Buildpack{Name: "java", Version: "4.7.1", Freshness: 0, IsDeprecated: false}))
+
 	})
 
 	Context("when there is a custom buildpack", func() {
