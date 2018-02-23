@@ -90,7 +90,7 @@ var _ = Describe("Main", func() {
 				gocf.App{
 					Name:                  "app1",
 					UpdatedAt:             "2017-08-12T16:41:45Z",
-					DetectedBuildpackGuid: "abc123",
+					DetectedBuildpackGuid: "hij789",
 					SpaceGuid:             "aaaaa",
 					Instances:             1,
 					Memory:                64,
@@ -135,6 +135,10 @@ var _ = Describe("Main", func() {
 				"33333": gocf.Buildpack{
 					Name:     "ruby_buildpack",
 					Filename: "ruby_buildpack-cached-v2.0.1.zip",
+				},
+				"44444": gocf.Buildpack{
+					Name:     "ruby_buildpack",
+					Filename: "ruby_buildpack-cached-v2.0.2.zip",
 				},
 			}, nil
 		}
@@ -277,7 +281,7 @@ var _ = Describe("Main", func() {
 			Expect(xpath("/html/body/div/table/tbody/tr[3]/td[9]")).To(Equal("no"))
 
 			// buildpack name and version
-			Expect(xpath("/html/body/div/table/tbody/tr[1]/td[10]")).To(ContainSubstring("ruby 1.6.47"))
+			Expect(xpath("/html/body/div/table/tbody/tr[1]/td[10]")).To(ContainSubstring("ruby 2.0.0"))
 			Expect(xpath("/html/body/div/table/tbody/tr[2]/td[10]")).To(ContainSubstring("java 1.19"))
 			Expect(xpath("/html/body/div/table/tbody/tr[3]/td[10]")).To(ContainSubstring("https://github.com/cloudfoundry/staticfile-buildpack"))
 
@@ -368,7 +372,7 @@ var _ = Describe("Main", func() {
 				Expect(appData.Apps[0].UpdatedAt).To(Equal("2017-08-12"))
 				Expect(appData.Apps[0].IsStale).To(BeFalse())
 				Expect(appData.Apps[0].Buildpack.Name).To(Equal("ruby"))
-				Expect(appData.Apps[0].Buildpack.Version).To(Equal("1.6.47"))
+				Expect(appData.Apps[0].Buildpack.Version).To(Equal("2.0.0"))
 				Expect(appData.Apps[0].Buildpack.Freshness).To(Equal(2))
 				Expect(appData.Apps[0].Buildpack.IsDeprecated).To(BeTrue())
 				Expect(appData.Apps[1].Name).To(Equal("app2"))
