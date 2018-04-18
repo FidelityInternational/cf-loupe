@@ -360,42 +360,28 @@ func parseBuildpackFilename(filename string) (string, string, error) {
 		version string
 		name    string
 	)
-	// format:
-	// NAME_buildpack-cached-v1.2.3.zip
-	// NAME_buildpack-offline-v1.2.3.zip
-	// NAME-buildpack-v1.2.3.zip
-	// where '-cached' or '-offline' are optional, and 'buildpack' can be preceeded with
-	// '_' or '-'
+	// ^(Region-)?(Name)[_-]buildpack(-cached|-offline)?-v(Version)(String-Hash)?\.zip$:
+	// Region is Optional with 2 length char
+	// Name is like java, dotnet-core, go, ruby, etc
+	// '-cached' or '-offline' are optional
+	// Version is in pattern of 1.2.3, 1_2_3
+	// String-Hash is optional
 	if filename != "" {
-		re, err := regexp.Compile(`^([a-z\-]+)[_-]buildpack(-cached|-offline)?-v([0-9\.]+)\.zip$`)
+		re, err := regexp.Compile(`^([a-zA-Z]{2}-)?([a-zA-Z-]+)[_-]buildpack(-cached|-offline)?-v([0-9_.]+)(-[a-zA-Z]+-[a-f0-9]{7})?\.zip$`)
 		if err != nil {
 			return "", "", err
 		}
 		captures := re.FindStringSubmatch(filename)
-		if len(captures) < 3 || len(captures) > 4 {
-			return parseSpecialJavaBuildpackFilename(filename)
+		if captures == nil {
+			return "", "", fmt.Errorf("Couldn't parse buildpack filename: \"%s\"", filename)
 		}
 
-		// name is the second capture since the first is the entire match
-		name = captures[1]
-		// version will be the last capture
-		version = captures[len(captures)-1]
+		// name is the thrid capture since the first is the entire match
+		// and second is region
+		name = captures[2]
+		// version will be the second from last of capture
+		version = strings.Replace(captures[len(captures)-2], "_", ".", -1)
 	}
-
-	return name, version, nil
-}
-
-func parseSpecialJavaBuildpackFilename(filename string) (string, string, error) {
-	re, err := regexp.Compile(`^([a-z]+)[_-]buildpack(-cached|-offline)?-v([0-9_]+)-[a-zA-Z]+-[a-f0-9]{7}\.zip$`)
-	if err != nil {
-		return "", "", err
-	}
-	captures := re.FindStringSubmatch(filename)
-	if len(captures) < 3 || len(captures) > 4 {
-		return "", "", fmt.Errorf("Couldn't parse buildpack filename: \"%s\"", filename)
-	}
-	name := captures[1]
-	version := strings.Replace(captures[len(captures)-1], "_", ".", -1)
 
 	return name, version, nil
 }
