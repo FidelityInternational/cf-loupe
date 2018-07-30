@@ -367,7 +367,7 @@ func parseBuildpackFilename(filename string) (string, string, error) {
 	// Version is in pattern of 1.2.3, 1_2_3
 	// String-Hash is optional
 	if filename != "" {
-		re, err := regexp.Compile(`^([a-zA-Z]{2}-)?([a-zA-Z-]+)[_-]buildpack(-cached|-offline)?-v([0-9_.]+)(-[a-zA-Z]+-[a-f0-9]{7})?\.zip$`)
+		re, err := regexp.Compile(`^([a-zA-Z]{2}-)?([a-zA-Z-]+)[_-]buildpack(-cached|-offline)?(-cflinuxfs2)?-v([0-9_.]+)(-[a-zA-Z]+-[a-f0-9]{7})?\.zip$`)
 		if err != nil {
 			return "", "", err
 		}

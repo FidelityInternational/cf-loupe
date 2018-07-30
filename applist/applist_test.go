@@ -41,6 +41,7 @@ var _ = Describe("Build", func() {
 			{Name: "app-java-another-v4", DetectedBuildpackGuid: "guid-25", UpdatedAt: "2017-08-25T12:00:00Z", SpaceGuid: "def456", Instances: 1, Memory: 512, State: "stopped"},
 			{Name: "rg-app-java-v3", DetectedBuildpackGuid: "guid-26", UpdatedAt: "2017-08-26T12:00:00Z", SpaceGuid: "def456", Instances: 1, Memory: 512, State: "stopped"},
 			{Name: "rg-app-java-v4", DetectedBuildpackGuid: "guid-27", UpdatedAt: "2017-08-27T12:00:00Z", SpaceGuid: "def456", Instances: 1, Memory: 512, State: "stopped"},
+			{Name: "app-go_buildpack_v1.8.25", DetectedBuildpackGuid: "guid-28", UpdatedAt: "2017-08-28T12:00:00Z", SpaceGuid: "def456", Instances: 1, Memory: 512, State: "stopped"},
 		}
 
 		buildpacksMap := map[string]gocf.Buildpack{
@@ -71,6 +72,7 @@ var _ = Describe("Build", func() {
 			"guid-25": {Name: "java-v4_7_1-company-c35e32c", Filename: "java-buildpack-v4_7_1-company-c35e32c.zip"},
 			"guid-26": {Name: "rg-java-v3_19-company-c35e32c", Filename: "rg-java-buildpack-v3_19-company-c35e32c.zip"},
 			"guid-27": {Name: "rg-java-v4_6-company-3e097ee", Filename: "rg-java-buildpack-v4_6-company-3e097ee.zip"},
+			"guid-28": {Name: "go_buildpack_v1.8.25", Filename: "go_buildpack-cached-cflinuxfs2-v1.8.25.zip"},
 		}
 
 		foundation := Foundation{
@@ -112,7 +114,7 @@ var _ = Describe("Build", func() {
 		Expect(appList[15].Buildpack).To(Equal(Buildpack{Name: "ruby", Version: "1.6.39", Freshness: 0, IsDeprecated: false}))
 		Expect(appList[16].Buildpack).To(Equal(Buildpack{Name: "java", Version: "3.16", Freshness: 3, IsDeprecated: true}))
 		Expect(appList[17].Buildpack).To(Equal(Buildpack{Name: "nodejs", Version: "1.5.34", Freshness: 2, IsDeprecated: true}))
-		Expect(appList[18].Buildpack).To(Equal(Buildpack{Name: "go", Version: "1.8.2", Freshness: 0, IsDeprecated: false}))
+		Expect(appList[18].Buildpack).To(Equal(Buildpack{Name: "go", Version: "1.8.2", Freshness: 1, IsDeprecated: false}))
 		Expect(appList[19].Buildpack).To(Equal(Buildpack{Name: "python", Version: "1.5.18", Freshness: 5, IsDeprecated: true}))
 		Expect(appList[20].Buildpack).To(Equal(Buildpack{Name: "php", Version: "4.3.33", Freshness: 0, IsDeprecated: false}))
 		Expect(appList[21].Buildpack).To(Equal(Buildpack{Name: "binary", Version: "1.0.13", Freshness: 0, IsDeprecated: false}))
@@ -122,6 +124,7 @@ var _ = Describe("Build", func() {
 		Expect(appList[25].Buildpack).To(Equal(Buildpack{Name: "java", Version: "4.7.1", Freshness: 0, IsDeprecated: false}))
 		Expect(appList[26].Buildpack).To(Equal(Buildpack{Name: "java", Version: "3.19", Freshness: 0, IsDeprecated: false}))
 		Expect(appList[27].Buildpack).To(Equal(Buildpack{Name: "java", Version: "4.6", Freshness: 1, IsDeprecated: false}))
+		Expect(appList[28].Buildpack).To(Equal(Buildpack{Name: "go", Version: "1.8.25", Freshness: 0, IsDeprecated: false}))
 
 	})
 
